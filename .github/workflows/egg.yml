@@ -1,0 +1,38 @@
+name: Regenerate
+ 
+on:
+  schedule:
+    - cron: '0 0 * * *'
+ 
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+ 
+    - name: Configure Git
+      run: |
+        git config user.name 'plasmadice'
+        git config user.email '19928793+plasmadice@users.noreply.github.com'
+ 
+    - name: Reset origin repository to upstream
+      run: |
+        workflow_content=$(cat .github/workflows/egg.yml)
+        git remote add upstream https://github.com/TransformerOptimus/SuperAGI
+        git reset --hard upstream/main
+        git fetch upstream
+        git pull upstream main
+        mkdir -p .github/workflows
+        echo "$workflow_content" > .github/workflows/egg.yml
+ 
+    - name: Custom work to be done
+      run: |
+        echo "Example file contents" > example.txt
+ 
+    - name: Commit and push changes if there are any
+      run: |
+        git add -A
+        git diff-index --quiet HEAD || git commit -m "chore: pull changes and redo work"
+        git push origin || echo "No changes to commit"
